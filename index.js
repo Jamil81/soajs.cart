@@ -27,11 +27,24 @@ service.init(function () {
 	 * getCart: the getCart api returns the content of the cart for the current logged in user
 	 */
 	service.get("/cart/getCart", function (req, res) {
+
+		var myUrac = req.soajs.session.getUrac();
+		console.log(myUrac);
+
+		console.log("test");
+
+		res.json(req.soajs.buildResponse(null, {
+				result : myUrac
+			}
+		));
+
+		/*
 		initBLModel(req, res, function (BL) {
-			BL.getEntries(config, req.soajs, function (error, response) {
+			BL.getItems(config, req.soajs, function (error, response) {
 				return res.json(req.soajs.buildResponse(error, response));
 			});
-		});
+
+		});*/
 	});
 
 	/**
@@ -39,20 +52,16 @@ service.init(function () {
 	 */
 	service.post("/cart/setCart", function (req, res) {
 		initBLModel(req, res, function (BL) {
-			BL.addEntry(config, req.soajs, function (error, response) {
-				return res.json(req.soajs.buildResponse(error, response));
-			});
+
 		});
 	});
 
 	/**
 	 * emptyCart: the emptyCart api will delete all items from the cart
 	 */
-	service.delete("/contact/emptyCart", function (req, res) {
+	service.delete("/cart/emptyCart", function (req, res) {
 		initBLModel(req, res, function (BL) {
-			BL.deleteEntry(config, req.soajs, function (error, response) {
-				return res.json(req.soajs.buildResponse(error, response));
-			});
+
 		});
 	});
 
@@ -62,9 +71,7 @@ service.init(function () {
 	 */
 	service.get("/cart/getCarts", function (req, res) {
 		initBLModel(req, res, function (BL) {
-			BL.getEntries(config, req.soajs, function (error, response) {
-				return res.json(req.soajs.buildResponse(error, response));
-			});
+
 		});
 	});
 
