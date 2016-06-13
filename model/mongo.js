@@ -27,7 +27,7 @@ module.exports = {
         //mongo.find(collName, {user:{id: "57592d0d37648aeb0231504e"}}, options, cb);
 
         var userId = soajs.inputmaskData.userId;
-        soajs.log.debug("fetching card for user " + userId );
+        soajs.log.debug("fetching card for user " + userId);
         mongo.findOne(collName, {"user.id": userId}, options, function (error, data) {
             console.log(error);
             console.log(data);
@@ -44,6 +44,7 @@ module.exports = {
          * @type {{fields: {items: number}}}
          */
 
+        var options = {};
         var userId = soajs.inputmaskData.userId;
         mongo.findOne(collName, {"user.id": userId}, options, function (error, data) {
             console.log(error);
@@ -51,12 +52,12 @@ module.exports = {
             if (error)
                 return cb(error, data);
             else {
-                var curTime  = new Date().getTime();
+                var curTime = new Date().getTime();
+                console.log("time:" + curTime);
+                console.log("Data:" + data);
                 // check if the user already have an existing cart
-                if (empty(data)) {
+                if (!data) {
                     // insert new cart
-
-
                     //var userUsername = soajs.inputmaskData.userId;
                     //getting user data
                     var myUrac = soajs.session.getUrac();
@@ -64,16 +65,17 @@ module.exports = {
                     var tenantId = myUrac.tenant.id;
 
 
+                    console.log("Urac:" + myUrac);
                     var input = {
                         // id will be auto gen"_id": ObjectId('575e71cc89bca0ee1a000001'),
-                        "tenanttenant": tenantId,
+                        "tenantid": tenantId,
                         "user": {
                             "id": userId,
                             "username": username
                         },
                         "created": curTime,
                         "modified": curTime,
-                        "items": soajs.inputmaskData.data
+                        "items": soajs.inputmaskData.items
 
                     };
                     mongo.insert(collName, input, function (error) {
@@ -83,14 +85,38 @@ module.exports = {
 
                 }
                 else {
-                    // update existing cart
-                    var items = data.items;// get the already found items
-                    items.push(soajs.inputmaskData.data);// add the new items
-                    var updateRec = {$set: {
-                        "items": items,
-                        "modified": time//get current timestamp
-                    }};
-                    mongo.update(collName, {"user.id": userId}, updateRec, {"multi": false, "upsert": false, "safe": true}, cb);
+
+                    // add items to the existing list
+                    var items = {};
+                    soajs.log.debug("updateing record  " + data._id);
+                    if (soajs.inputmaskData.add) {
+                        items = data.items;// get the already found items
+                        // update existing cart
+                        soajs.log.debug("Old Items are:  " + items);
+                        console.log(items);
+                        items = items.concat(soajs.inputmaskData.items);// add the new items
+                    }
+                    else {
+                        // in case of replacing the cart
+                        items = soajs.inputmaskData.items;
+                    }
+                    /*
+                     soajs.log.debug("Items to add are:  " + soajs.inputmaskData.items);
+                     console.log( soajs.inputmaskData.items );
+                     */
+                    soajs.log.debug("Updated Items are:  " + items);
+                    console.log(items);
+                    var updateRec = {
+                        $set: {
+                            "items": items,
+                            "modified": curTime//get current timestamp
+                        }
+                    };
+                    mongo.update(collName, {"user.id": userId}, updateRec, {
+                        "multi": false,
+                        "upsert": false,
+                        "safe": true
+                    }, cb);
 
                 }
             }
@@ -113,16 +139,18 @@ module.exports = {
             }
             // #ja #2check what is upsert
 
-            var updateRec = {$set: {
-                "items": []
-            }};
+            var updateRec = {
+                $set: {
+                    "items": []
+                }
+            };
             mongo.update(collName, {"user.id": userId}, updateRec, {"multi": false, "upsert": false, "safe": true}, cb);
         });
         /**
          * just for testing - this is not what we want we just wanna remove the items
          * keeping the rest of the record
-        // var options = {fields: {items: 1}};it wonn't work this way
-        mongo.remove(collName, {"user.id": userId }, function (error) {
+         // var options = {fields: {items: 1}};it wonn't work this way
+         mongo.remove(collName, {"user.id": userId }, function (error) {
             console.log(error);
             return cb(error, true);
         });
@@ -134,10 +162,10 @@ module.exports = {
             start: soajs.inputmaskData.start,
             limit: soajs.inputmaskData.limit
         };
-        console.log( "limit is " + soajs.inputmaskData.limit );
-        console.log( "starting from " + soajs.inputmaskData.start );
+        console.log("limit is " + soajs.inputmaskData.limit);
+        console.log("starting from " + soajs.inputmaskData.start);
         // #2fix #ja note start is not working
-        mongo.find(collName, {}, options,  function (error,data) {
+        mongo.find(collName, {}, options, function (error, data) {
             console.log(error);
             console.log(data);
             return cb(error, data);

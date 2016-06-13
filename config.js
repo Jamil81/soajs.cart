@@ -44,6 +44,15 @@ module.exports = {
                 "group": "Basic"
             },
             "commonFields": ["userId"],
+            // reset the cart or add items to the old ones
+            "add" : {
+                "source": ['query.add'],
+                "default" : false,
+                "validation": {
+                    "type" : "boolean"
+                }
+
+            },
             "items": {
                 "source": ['body.items'],
                 "validation": {
