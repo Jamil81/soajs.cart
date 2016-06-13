@@ -7,7 +7,7 @@ var soajs = require('soajs');
 var Mongo = soajs.mongo;
 var mongo;
 
-var dbName = "tenantCode_ShoppingCart";
+var dbName = "shoppingcart";
 var collName = "carts";
 
 function checkIfMongo(soajs) {
@@ -15,7 +15,6 @@ function checkIfMongo(soajs) {
         mongo = new Mongo(soajs.registry.coreDB[dbName]);
     }
 }
-
 
 module.exports = {
 
@@ -28,103 +27,43 @@ module.exports = {
 
         var userId = soajs.inputmaskData.userId;
         soajs.log.debug("fetching card for user " + userId);
-        mongo.findOne(collName, {"user.id": userId}, options, function (error, data) {
-            console.log(error);
-            console.log(data);
-            return cb(error, data);
-        });
-
-
+        mongo.findOne(collName, {"user.id": userId}, options, cb);
     },
+
+
     "setCart": function (soajs, cb) {
         checkIfMongo(soajs);
 
-        /**
-         * check if the cart is already set then update its itemss
-         * @type {{fields: {items: number}}}
-         */
-
-        var options = {};
+        var curTime = new Date().getTime();
         var userId = soajs.inputmaskData.userId;
-        mongo.findOne(collName, {"user.id": userId}, options, function (error, data) {
-            console.log(error);
-            console.log(data);
-            if (error)
-                return cb(error, data);
-            else {
-                var curTime = new Date().getTime();
-                console.log("time:" + curTime);
-                console.log("Data:" + data);
-                // check if the user already have an existing cart
-                if (!data) {
-                    // insert new cart
-                    //var userUsername = soajs.inputmaskData.userId;
-                    //getting user data
-                    var myUrac = soajs.session.getUrac();
-                    var username = myUrac.username;
-                    var tenantId = myUrac.tenant.id;
+        var myUrac = soajs.session.getUrac();
+        var username = myUrac.username;
+        var tenantId = myUrac.tenant.id;
+        var input = {
+            // id will be auto gen"_id": ObjectId('575e71cc89bca0ee1a000001'),
+            "tenantid": tenantId,
+            "user": {
+                "id": userId,
+                "username": username
+            },
+            "created": curTime
 
-
-                    console.log("Urac:" + myUrac);
-                    var input = {
-                        // id will be auto gen"_id": ObjectId('575e71cc89bca0ee1a000001'),
-                        "tenantid": tenantId,
-                        "user": {
-                            "id": userId,
-                            "username": username
-                        },
-                        "created": curTime,
-                        "modified": curTime,
-                        "items": soajs.inputmaskData.items
-
-                    };
-                    mongo.insert(collName, input, function (error) {
-                        return cb(error, true);
-                    });
-
-
+        };
+        mongo.update(
+            collName,
+            {"user.id": userId},
+            {
+                $setOnInsert: input,
+                $set: {
+                    "items": soajs.inputmaskData.items,
+                    "modified": curTime
                 }
-                else {
-
-                    // add items to the existing list
-                    var items = {};
-                    soajs.log.debug("updateing record  " + data._id);
-                    if (soajs.inputmaskData.add) {
-                        items = data.items;// get the already found items
-                        // update existing cart
-                        soajs.log.debug("Old Items are:  " + items);
-                        console.log(items);
-                        items = items.concat(soajs.inputmaskData.items);// add the new items
-                    }
-                    else {
-                        // in case of replacing the cart
-                        items = soajs.inputmaskData.items;
-                    }
-                    /*
-                     soajs.log.debug("Items to add are:  " + soajs.inputmaskData.items);
-                     console.log( soajs.inputmaskData.items );
-                     */
-                    soajs.log.debug("Updated Items are:  " + items);
-                    console.log(items);
-                    var updateRec = {
-                        $set: {
-                            "items": items,
-                            "modified": curTime//get current timestamp
-                        }
-                    };
-                    mongo.update(collName, {"user.id": userId}, updateRec, {
-                        "multi": false,
-                        "upsert": false,
-                        "safe": true
-                    }, cb);
-
-                }
-            }
-
-        });
-
-
+            },
+            {"multi": false, upsert: true, "safe": true} ,
+            cb
+        );
     },
+
     "emptyCart": function (soajs, cb) {
         checkIfMongo(soajs);
         var userId = soajs.inputmaskData.userId;
@@ -156,19 +95,15 @@ module.exports = {
         });
          **/
     },
+
     "getCarts": function (soajs, cb) {
         checkIfMongo(soajs);
         var options = {
             start: soajs.inputmaskData.start,
             limit: soajs.inputmaskData.limit
         };
-        console.log("limit is " + soajs.inputmaskData.limit);
-        console.log("starting from " + soajs.inputmaskData.start);
+
         // #2fix #ja note start is not working
-        mongo.find(collName, {}, options, function (error, data) {
-            console.log(error);
-            console.log(data);
-            return cb(error, data);
-        });
+        mongo.find(collName, {}, {}, options, cb);
     }
 };

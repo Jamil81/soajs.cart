@@ -5,9 +5,6 @@ var BLModule = require("./lib/index");
 
 var service = new soajs.server.service(config);
 
-
-
-
 service.init(function () {
 
     /**
