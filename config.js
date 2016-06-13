@@ -4,7 +4,7 @@ var itemProp = require(__dirname + "/model/schemas/item.js");
 module.exports = {
     "serviceName": "shoppingCart",
     "serviceVersion": 1,
-    "servicePort": 1993,
+    "servicePort": 4900,
     "serviceGroup": "SOAJS Shopping Cart",
     "extKeyRequired": true,
     "session": true,
@@ -14,14 +14,15 @@ module.exports = {
         memory: ''
     },
     "errors": {
-        400: "Error Executing Operations!",
-        401: "Entry not found!"
+        400: "Failed to connect to Database", // unknown db connection error
+        401: "Thou shall not pass (Invalid user Id provided)", //user id does not match the logged in user
+        402: "Y u no login?!!!!" //invalid login
     },
     "schema": {
 
         "commonFields": {
-            "id": {
-                "source": ['query.id'],
+            "userId": {
+                "source": ['query.userId'],
                 "required": true,
                 "validation": {
                     "type": "string"
@@ -31,10 +32,10 @@ module.exports = {
 
         "/cart/getCart": {
             "_apiInfo": {
-                "l": "Get all items of a given user",
+                "l": "Get all items of a given user cart",
                 "group": "Basic"
             },
-            "commonFields": ["id"]
+            "commonFields": ["userId"]
         },
 
         "/cart/setCart": {
@@ -42,7 +43,16 @@ module.exports = {
                 "l": "Add items to cart",
                 "group": "Basic"
             },
-            "commonFields": ["id"],
+            "commonFields": ["userId"],
+            // reset the cart or add items to the old ones
+            "add" : {
+                "source": ['query.add'],
+                "default" : false,
+                "validation": {
+                    "type" : "boolean"
+                }
+
+            },
             "items": {
                 "source": ['body.items'],
                 "validation": {
@@ -66,29 +76,29 @@ module.exports = {
                 "l": "empty cart",
                 "group": "Basic"
             },
-            "commonFields": ["id"]
+            "commonFields": ["userId"]
         },//emptyCart
 
         "/cart/getCarts":{
             "_apiInfo": {
-                "l": "empty cart",
+                "l": "list all user carts",
                 "group": "Manage"
             }
             ,
             "start": {
                 "source": ['query.start'],
                 "required": false,
+                "default" : 0,
                 "validation": {
-                    "type": "integer",
-                    "default" : 0
+                    "type": "integer"
                 }
             },
             "limit": {
                 "source": ['query.limit'],
+                "default" : 1000,
                 "required": false,
                 "validation": {
-                    "type": "integer",
-                    "default" : 1000
+                    "type": "integer"
                 }
             }
         }//getCarts
