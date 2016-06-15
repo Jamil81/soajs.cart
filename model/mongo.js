@@ -25,8 +25,13 @@ module.exports = {
         var options = {fields: {items: 1}};
         //mongo.find(collName, {user:{id: "57592d0d37648aeb0231504e"}}, options, cb);
 
-        var userId = soajs.inputmaskData.userId;
-        soajs.log.debug("fetching card for user " + userId);
+
+        try {
+            var userId = mongo.ObjectId(soajs.inputmaskData.userId);
+        }
+        catch (e) {
+        }
+        soajs.log.info("fetching card for user " + userId);
         mongo.findOne(collName, {"user.id": userId}, options, cb);
     },
 
@@ -37,11 +42,15 @@ module.exports = {
         var curTime = new Date().getTime();
         var userId = soajs.inputmaskData.userId;
         var myUrac = soajs.session.getUrac();
+
+/*
+        console.log( JSON.stringify(myUrac, null, 2) );
+        console.log("tenant: : " + JSON.stringify(myUrac.tenant, null, 2));
+        console.log(soajs.inputmaskData.items);
+        */
         var username = myUrac.username;
-        var tenantId = myUrac.tenant.id;
         var input = {
             // id will be auto gen"_id": ObjectId('575e71cc89bca0ee1a000001'),
-            "tenantid": tenantId,
             "user": {
                 "id": userId,
                 "username": username
@@ -49,6 +58,12 @@ module.exports = {
             "created": curTime
 
         };
+
+        if( myUrac.tenant && myUrac.tenant.id)
+        {
+
+            input["tenantid"] = myUrac.tenant.id;
+        }
         mongo.update(
             collName,
             {"user.id": userId},
@@ -59,7 +74,7 @@ module.exports = {
                     "modified": curTime
                 }
             },
-            {"multi": false, upsert: true, "safe": true} ,
+            {"multi": false, upsert: true, "safe": true},
             cb
         );
     },
@@ -69,21 +84,38 @@ module.exports = {
         var userId = soajs.inputmaskData.userId;
 
         mongo.count(collName, {"user.id": userId}, function (error, count) {
+            console.log("Count is: " + count);
             if (error) {
                 return cb(error);
             }
-
             if (!count) {
-                return cb(new Error("User have no cart"));
+
+                var opts = {
+                    error: null,
+                    data: true,
+                    result:true
+                };
+                console.log("user have no cart");
+                //return soajs.buildResponse(soajs, opts, cb);
+                /*return soajs.buildResponse({"code": 403, "msg": "dd"}) ;
+
+                console.log("halt - Count is: " + count);
+
+                return cb({"code": 403, "msg": "dd"})*/
+                //return cb(new Error("User have no cart",403),opts);
+                 return cb(null , opts);
             }
-            // #ja #2check what is upsert
 
             var updateRec = {
                 $set: {
                     "items": []
                 }
             };
-            mongo.update(collName, {"user.id": userId}, updateRec, {"multi": false, "upsert": false, "safe": true}, cb);
+            mongo.update(collName, {"user.id": userId}, updateRec, {
+                "multi": false,
+                "upsert": false,
+                "safe": true
+            }, cb);
         });
         /**
          * just for testing - this is not what we want we just wanna remove the items
