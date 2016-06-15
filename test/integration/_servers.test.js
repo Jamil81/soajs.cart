@@ -2,9 +2,8 @@
 var shell = require('shelljs');
 var assert = require('assert');
 var helper = require("../helper.js");
-
-var sampleData = require("soajs.mongodb.data/modules/shoppingCart/index.js");
-
+ var sampleData =  helper.requireModule("../../../data/shoppingCart/index.js");
+//var sampleData =require("/data/shoppingCart/index.js");
 var mainService, urac, controller;
 
 describe("importing sample data", function () {

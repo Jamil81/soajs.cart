@@ -85,7 +85,7 @@ describe("Testing Service APIs", function () {
                 'key': extKey
             }
         };
-        helper.requester('post', loginParams, function (err, body, req) {
+        helper.requester('post', loginParams, function (err, body) {
             assert.ifError(err);
             assert.ok(body);
             assert.equal(body.result, true);
@@ -114,7 +114,6 @@ describe("Testing Service APIs", function () {
             executeMyRequest(params, 'cart/getCart', 'get', function (body) {
                 // console.log(JSON.stringify(body, null, 2) );
                 assert.ok(body.result);
-                var emptyArr = [];
                 assert.deepEqual(body.data, [], "Empty string ok");
                 done();
             });
@@ -273,7 +272,7 @@ describe("Testing Service APIs", function () {
                         "color": ["black", "white"],
                         "weight": chance.natural({min: 1, max: 12})+"g"
                     }
-                }
+                };
             }
 
             console.log(items);
@@ -318,7 +317,7 @@ describe("Testing Service APIs", function () {
                     'key': extKey
                 }
             };
-            helper.requester('post', loginParams, function (err, body, req) {
+            helper.requester('post', loginParams, function (err, body) {
                 assert.ifError(err);
                 assert.ok(body);
                 assert.equal(body.result, true);
@@ -394,4 +393,26 @@ describe("Testing Service APIs", function () {
         });
 
     }); // end no tenant user
+
+
+    describe("Testing Error messages", function () {
+
+        it('getCart of no user', function (done) {
+            var params = {
+                qs: {
+                    userId: userId
+                },
+                headers: {
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/getCart', 'get', function (body) {
+                // console.log(JSON.stringify(body, null, 2) );
+                assert.ok(body.result);
+                assert.deepEqual(body.data, [], "Empty string ok");
+                done();
+            });
+        });
+
+    });
 });

@@ -20,18 +20,8 @@ module.exports = {
 
     "getCart": function (soajs, cb) {
         checkIfMongo(soajs);
-        soajs.log.debug("Its up to mongo to get a cart");
-
         var options = {fields: {items: 1}};
-        //mongo.find(collName, {user:{id: "57592d0d37648aeb0231504e"}}, options, cb);
-
-
-        try {
-            var userId = mongo.ObjectId(soajs.inputmaskData.userId);
-        }
-        catch (e) {
-        }
-        soajs.log.info("fetching card for user " + userId);
+        var userId = soajs.inputmaskData.userId;
         mongo.findOne(collName, {"user.id": userId}, options, cb);
     },
 
@@ -43,11 +33,11 @@ module.exports = {
         var userId = soajs.inputmaskData.userId;
         var myUrac = soajs.session.getUrac();
 
-/*
-        console.log( JSON.stringify(myUrac, null, 2) );
-        console.log("tenant: : " + JSON.stringify(myUrac.tenant, null, 2));
-        console.log(soajs.inputmaskData.items);
-        */
+        /*
+         console.log( JSON.stringify(myUrac, null, 2) );
+         console.log("tenant: : " + JSON.stringify(myUrac.tenant, null, 2));
+         console.log(soajs.inputmaskData.items);
+         */
         var username = myUrac.username;
         var input = {
             // id will be auto gen"_id": ObjectId('575e71cc89bca0ee1a000001'),
@@ -59,8 +49,7 @@ module.exports = {
 
         };
 
-        if( myUrac.tenant && myUrac.tenant.id)
-        {
+        if (myUrac.tenant && myUrac.tenant.id) {
 
             input["tenantid"] = myUrac.tenant.id;
         }
@@ -93,17 +82,17 @@ module.exports = {
                 var opts = {
                     error: null,
                     data: true,
-                    result:true
+                    result: true
                 };
                 console.log("user have no cart");
                 //return soajs.buildResponse(soajs, opts, cb);
                 /*return soajs.buildResponse({"code": 403, "msg": "dd"}) ;
 
-                console.log("halt - Count is: " + count);
+                 console.log("halt - Count is: " + count);
 
-                return cb({"code": 403, "msg": "dd"})*/
+                 return cb({"code": 403, "msg": "dd"})*/
                 //return cb(new Error("User have no cart",403),opts);
-                 return cb(null , opts);
+                return cb(null, opts);
             }
 
             var updateRec = {
