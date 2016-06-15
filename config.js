@@ -16,7 +16,8 @@ module.exports = {
     "errors": {
         400: "Failed to connect to Database", // unknown db connection error
         401: "Thou shall not pass (Invalid user Id provided)", //user id does not match the logged in user
-        402: "Y u no login?!!!!" //invalid login
+        402: "Y u no login?!!!!",//invalid login,
+        403: "Cart is empty" //invalid login
     },
     "schema": {
 
