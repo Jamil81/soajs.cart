@@ -29,9 +29,11 @@ var lib = {
 	 * Function load the npm tasks from the root path
 	 *
 	 * @method loadTasks
-	 * @param grunt {Object} The grunt instance
+	 * @param grunt {Object} The grunt instance 
+	 * @param rootPath
 	 * @param tasks {Array} Array of tasks as string
 	 */
+
 	loadTasks: function (grunt, rootPath, tasks) {
 		tasks.forEach(function (name) {
 			if (name === 'grunt-cli') return;
@@ -75,7 +77,7 @@ module.exports = function (grunt) {
 					"after": false,
 					"afterEach": false
 				},
-				ignores: ['test/coverage/**/*.js']
+				ignores: ['test/coverage/**/*.js' , 'data/shoppingCart/**/*.js']
 			},
 			files: {
 				src: ['**/*.js']
