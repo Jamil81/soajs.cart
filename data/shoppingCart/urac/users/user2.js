@@ -16,6 +16,6 @@ var user2 ={
 	"groups": [
 		"administrator"
 	]
-}
+};
 
 

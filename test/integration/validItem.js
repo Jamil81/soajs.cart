@@ -1,6 +1,6 @@
 "use strict";
 // Instantiate Chance so it can be used
-var chance = new Chance();
+var Chance = require("chance");
 var chance = new Chance(Math.random);
 
 module.exports = {

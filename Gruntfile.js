@@ -67,7 +67,7 @@ module.exports = function (grunt) {
 				"supernew": true,
 				"validthis": true,
 				"node": true,
-				"maxerr": 10,
+				"maxerr": 100,
 				"indent": 2,
 				"globals": {
 					"describe": false,
@@ -86,16 +86,6 @@ module.exports = function (grunt) {
 				src: 'Gruntfile.js'
 			}
 		},
-		// jsdoc: {
-		//   doc : {
-		//     src: ['soajs/**/*.js'],
-		//     jsdoc: pluginsRootPath+'/node_modules/grunt-jsdoc/node_modules/jsdoc/jsdoc',
-		//     options: {
-		//       dest: 'doc',
-		//     }
-		//   }
-		// },
-
 
 		env: {
 			// ****** set needed env variables
@@ -134,8 +124,7 @@ module.exports = function (grunt) {
 
 		instrument: {
 			// ****** include all the code files required
-			files: ['index.js', 'config.js',
-				'lib/*.js','model/*.js','model/schemas/*.js'],
+			files: ['*.js', 'lib/*.js','model/*.js','model/*/*.js'],
 			
 			options: {
 				lazy: false,
@@ -204,8 +193,7 @@ module.exports = function (grunt) {
 	grunt.registerTask("custom", [ 'env:custom', 'instrument', 'mochaTest:integration']);
 
 	grunt.registerTask("test", ['clean', 'env:coverage', 'instrument', 'mochaTest:unit', 'mochaTest:integration']);
-	//grunt.registerTask("coverage", ['clean', 'env:coverage', 'instrument', 'mochaTest:integration', 'storeCoverage', 'makeReport', 'coveralls']);
-	grunt.registerTask("coverage", ['clean', 'env:coverage', 'instrument', 'mochaTest:integration',  'makeReport']);
+	grunt.registerTask("coverage", ['clean', 'env:coverage', 'instrument', 'mochaTest:integration',  'storeCoverage', 'makeReport']);
 
 };
 
