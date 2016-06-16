@@ -4,6 +4,8 @@ var async = require("async");
 var request = require("request");
 var helper = require("../helper");
 var mongo = helper.getMongo();
+// Load Chance
+var Chance = require('chance');
 
 // Any file that is not in the test folder should be required using the helper,
 // because you do not want to worry about location path with reference to the test folder
@@ -14,6 +16,49 @@ var errorCodes = config.errors;
 
 var extKey = helper.getKey();
 
+var globalMe = {};
+
+function generateRandomItem()
+{
+    var chance = new Chance(Math.random);
+    return   {
+
+        "productId": chance.string({length: 8, pool: '1234567890'}),
+        "title": chance.word({length: 7}),
+        "imagePath": "",
+        "price": chance.integer({min: 20, max: 2000}),
+        "groupId": chance.string({length: 8, pool: '1234567890'}),
+        "merchantId": chance.string({length: 8, pool: '1234567890'}),
+        "GTIN": chance.string({length: 10, pool: '1234567890'}),
+        "currency": "USD",
+        "quantity": chance.integer({min: 1, max: 12}),
+        "shippingPrice": chance.integer({min: 1, max: 70}),
+        "shippingMethods": [
+            {
+                "id": 1,
+                "methodeName": "Client Pickup",
+                "price": chance.dollar(),
+                "selected": "true"
+            },
+            {
+                "id": 2,
+                "methodeName": "Liban Post",
+                "price": chance.dollar(),
+                "selected": "false"
+            },
+            {
+                "id": 3,
+                "methodeName": "Urgent Delivery",
+                "price": chance.dollar(),
+                "selected": "false"
+            }
+        ],
+        "filters": {
+            "color": ["black", "white"],
+            "weight": chance.natural({min: 1, max: 12}) + "g"
+        }
+    }
+}
 // reusable function for executing requests
 function executeMyRequest(params, apiPath, method, cb) {
 
@@ -60,6 +105,8 @@ function executeMyRequest(params, apiPath, method, cb) {
 describe("Testing Service APIs", function () {
     var soajsauth;
     var userId;
+    var soajsauthOther;
+    var userIdOther;
     before(function (done) {
         console.log("------------------------ Do Something Before All tests ------------------------");
         done();
@@ -70,14 +117,91 @@ describe("Testing Service APIs", function () {
         done();
     });
 
-    it("Login", function (done) {
+    describe("Testing no tenant user", function () {
+        it("Login1", function (done) {
+            var loginParams = {
+                uri: 'http://127.0.0.1:4000/urac/login',
+                body: {"username": "user1", "password": "123456"},
+                headers: {'key': extKey}
+            };
+            helper.requester('post', loginParams, function (err, body) {
+                assert.ifError(err);
+                assert.ok(body);
+                assert.equal(body.result, true);
+                assert.ok(body.soajsauth);
+                console.log(JSON.stringify(body.data, null, 2));
+                userIdOther =  body.data._id.toString();
+                soajsauthOther = body.soajsauth;
+                done();
+            });
+        });
+        it('Add items', function (done) {
+            var params = {
+                qs: {userId: userIdOther},
+                form: {
+                    "items": [{
+                        "productId": "10000002",
+                        "title": "phone",
+                        "imagePath": "",
+                        "price": 245,
+                        "groupId": "10000002",
+                        "merchantId": "10000001",
+                        "GTIN": "1111111111",
+                        "currency": "USD",
+                        "quantity": 2,
+                        "shippingPrice": 0,
+                        "shippingMethods": [{
+                            "id": 1,
+                            "methodeName": "Client Pickup",
+                            "price": "0.00",
+                            "selected": "true"
+                        }, {"id": 2, "methodeName": "Liban Post", "price": "12", "selected": "false"}, {
+                            "id": 3,
+                            "methodeName": "Urgent Delivery",
+                            "price": "20",
+                            "selected": "false"
+                        }],
+                        "filters": {"color": ["black", "white"], "weight": "1.2g"}
+                    }]
+                },
+                headers: {"Content-Type": "application/json", soajsauth: soajsauthOther}
+            };
+            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
+                assert.ok(body.result);
+                console.log(JSON.stringify(body, null, 2));
+                done();
+            });
+        });
+
+        // logout the given user
+
+        it.skip("Logout", function (done) {
+            var loginParams = {
+                uri: 'http://127.0.0.1:4000/urac/logout',
+                headers: {'key': extKey}
+            };
+            helper.requester('get', loginParams, function (err, body) {
+                assert.ifError(err);
+                assert.ok(body);
+                globalMe["loggedOutUser"] = userIdOther;
+                done();
+            });
+        });
+    });
+
+
+    it("Login2", function (done) {
+
+        console.log("============================================================================== ");
+        console.log(" Now logging in to a normal user ");
+        console.log("============================================================================== ");
         var loginParams = {
             uri: 'http://127.0.0.1:4000/urac/login',
             body: {
                 /*
-                "username": "user1",
-                "password": "123456"
-                */
+                 "username": "user1",
+                 "password": "123456"
+                 */
                 "username": "jamil",
                 "password": "password"
             },
@@ -102,23 +226,6 @@ describe("Testing Service APIs", function () {
     // group tests for a single api in a describe
     describe("Testing Actions on empty data", function () {
 
-        it('getCart on empty db', function (done) {
-            var params = {
-                qs: {
-                    userId: userId
-                },
-                headers: {
-                    soajsauth: soajsauth
-                }
-            };
-            executeMyRequest(params, 'cart/getCart', 'get', function (body) {
-                // console.log(JSON.stringify(body, null, 2) );
-                assert.ok(body.result);
-                assert.deepEqual(body.data, [], "Empty string ok");
-                done();
-            });
-        });
-
 
         it('empty Cart on empty db', function (done) {
             var params = {
@@ -142,262 +249,7 @@ describe("Testing Service APIs", function () {
             });
         });
 
-        it.skip('Add items', function (done) {
-
-            // Load Chance
-            var Chance = require('chance');
-
-            // Instantiate Chance so it can be used
-            var chance = new Chance();
-
-            // Use Chance here.
-            var my_random_string = chance.string();
-            console.log("This is chance");
-            console.log(my_random_string);
-
-            var params = {
-                qs: {
-                    userId: userId
-                },
-                form: {
-                    "items": [
-                        {
-                            "productId": "10000002",
-                            "title":  chance.word({length: 5}) ,
-                            "imagePath": "",
-                            "price": 245,
-                            "groupId": "10000002",
-                            "merchantId": "10000001",
-                            "GTIN": "1111111111",
-                            "currency": "USD",
-                            "quantity": 2,
-                            "shippingPrice": 0,
-                            "shippingMethods": [
-                                {
-                                    "id": 1,
-                                    "methodeName": "Client Pickup",
-                                    "price": chance.dollar(),
-                                    "selected": "true"
-                                },
-                                {
-                                    "id": 2,
-                                    "methodeName": "Liban Post",
-                                    "price": chance.dollar(),
-                                    "selected": "false"
-                                },
-                                {
-                                    "id": 3,
-                                    "methodeName": "Urgent Delivery",
-                                    "price": chance.dollar() ,
-                                    "selected": "false"
-                                }
-                            ],
-                            "filters": {
-                                "color": ["black", "white"],
-                                "weight": chance.natural({min: 1, max: 12})+"g"
-                            }
-                        }
-                    ]
-                },
-                headers: {
-                    "Content-Type":"application/json",
-                    soajsauth: soajsauth
-                }
-            };
-            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
-                assert.ok(body.result);
-                console.log(JSON.stringify(body, null, 2));
-
-                //assert.equal(body.errors.details[0].code, 403);
-                //assert.equal(body.errors.details[0].message, "User have no cart");
-
-                done();
-            });
-        });
-
-
-
-        it(' Bulk Add items', function (done) {
-
-            // Load Chance
-            var Chance = require('chance');
-
-            // Instantiate Chance so it can be used
-            var chance = new Chance();
-
-            // Use Chance here.
-            var my_random_string = chance.string();
-            console.log("This is chance");
-            console.log(my_random_string);
-
-
-            var items =[];
-            var numberItems = chance.integer({min: 1, max: 20});
-
-            for( var i=0 ; i < numberItems; i++)
-            {
-                items[i] =
-                {
-                    "productId":  chance.string({length: 8, pool: '1234567890'}) ,
-                    "title":  chance.word({length: 7}) ,
-                    "imagePath": chance.avatar(),
-                    "price": chance.integer({min:20, max:2000}),
-                    "groupId": chance.string({length: 8, pool: '1234567890'}),
-                    "merchantId": chance.string({length: 8, pool: '1234567890'}) ,
-                    "GTIN": chance.string({length: 10, pool: '1234567890'}) ,
-                    "currency": "USD",
-                    "quantity": chance.integer({min:1, max:12}),
-                    "shippingPrice": chance.integer({min:1, max:70}),
-                    "shippingMethods": [
-                        {
-                            "id": 1,
-                            "methodeName": "Client Pickup",
-                            "price": chance.dollar(),
-                            "selected": "true"
-                        },
-                        {
-                            "id": 2,
-                            "methodeName": "Liban Post",
-                            "price": chance.dollar(),
-                            "selected": "false"
-                        },
-                        {
-                            "id": 3,
-                            "methodeName": "Urgent Delivery",
-                            "price": chance.dollar() ,
-                            "selected": "false"
-                        }
-                    ],
-                    "filters": {
-                        "color": ["black", "white"],
-                        "weight": chance.natural({min: 1, max: 12})+"g"
-                    }
-                };
-            }
-
-            console.log(items);
-            var params = {
-                qs: {
-                    userId: userId
-                },
-                form: {
-                    "items": items
-                },
-                headers: {
-                    "Content-Type":"application/json",
-                    soajsauth: soajsauth
-                }
-            };
-            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
-                assert.ok(body.result);
-                console.log(JSON.stringify(body, null, 2));
-                //assert.equal(body.errors.details[0].code, 403);
-                //assert.equal(body.errors.details[0].message, "User have no cart");
-
-                done();
-            });
-        });
-
-    });
-
-
-
-
-    describe("Testing no tenant user", function () {
-
-
-        it.skip("Login", function (done) {
-            var loginParams = {
-                uri: 'http://127.0.0.1:4000/urac/login',
-                body: {
-                     "username": "user1",
-                     "password": "123456"
-                },
-                headers: {
-                    'key': extKey
-                }
-            };
-            helper.requester('post', loginParams, function (err, body) {
-                assert.ifError(err);
-                assert.ok(body);
-                assert.equal(body.result, true);
-                assert.ok(body.soajsauth);
-                console.log(JSON.stringify(body.data, null, 2));
-                userId = body.data._id.toString();
-                // ****** add this to the headers, for example if you need all you subsequent tests to be in private mode
-                soajsauth = body.soajsauth;
-                done();
-            });
-
-        });
-
-        it.skip('Add items', function (done) {
-            var params = {
-                qs: {
-                    userId: userId
-                },
-                form: {
-                    "items": [
-                        {
-                            "productId": "10000002",
-                            "title": "phone",
-                            "imagePath": "",
-                            "price": 245,
-                            "groupId": "10000002",
-                            "merchantId": "10000001",
-                            "GTIN": "1111111111",
-                            "currency": "USD",
-                            "quantity": 2,
-                            "shippingPrice": 0,
-                            "shippingMethods": [
-                                {
-                                    "id": 1,
-                                    "methodeName": "Client Pickup",
-                                    "price": "0.00",
-                                    "selected": "true"
-                                },
-                                {
-                                    "id": 2,
-                                    "methodeName": "Liban Post",
-                                    "price": "12",
-                                    "selected": "false"
-                                },
-                                {
-                                    "id": 3,
-                                    "methodeName": "Urgent Delivery",
-                                    "price": "20",
-                                    "selected": "false"
-                                }
-                            ],
-                            "filters": {
-                                "color": ["black", "white"],
-                                "weight": "1.2g"
-                            }
-                        }
-                    ]
-                },
-                headers: {
-                    "Content-Type":"application/json",
-                    soajsauth: soajsauth
-                }
-            };
-            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
-                assert.ok(body.result);
-                console.log(JSON.stringify(body, null, 2));
-
-                //assert.equal(body.errors.details[0].code, 403);
-                //assert.equal(body.errors.details[0].message, "User have no cart");
-
-                done();
-            });
-        });
-
-    }); // end no tenant user
-
-
-    describe("Testing Error messages", function () {
-
-        it('getCart of no user', function (done) {
+        it('getCart on empty db', function (done) {
             var params = {
                 qs: {
                     userId: userId
@@ -414,5 +266,289 @@ describe("Testing Service APIs", function () {
             });
         });
 
+        it('Add items', function (done) {
+
+            // Instantiate Chance so it can be used
+            var chance = new Chance();
+
+            // Use Chance here.
+            var my_random_string = chance.string();
+            console.log("This is chance");
+            console.log(my_random_string);
+
+            var params = {
+                qs: {
+                    userId: userId
+                },
+                form: {
+                    "items": [
+                        {
+                            "productId": "10000002",
+                            "title": chance.word({length: 5}),
+                            "imagePath": "",
+                            "price": 245,
+                            "groupId": "10000002",
+                            "merchantId": "10000001",
+                            "GTIN": "1111111111",
+                            "currency": "USD",
+                            "quantity": 2,
+                            "shippingPrice": 0,
+                            "shippingMethods": [
+                                {
+                                    "id": 1,
+                                    "methodeName": "Client Pickup",
+                                    "price": chance.dollar(),
+                                    "selected": "true"
+                                },
+                                {
+                                    "id": 2,
+                                    "methodeName": "Liban Post",
+                                    "price": chance.dollar(),
+                                    "selected": "false"
+                                },
+                                {
+                                    "id": 3,
+                                    "methodeName": "Urgent Delivery",
+                                    "price": chance.dollar(),
+                                    "selected": "false"
+                                }
+                            ],
+                            "filters": {
+                                "color": ["black", "white"],
+                                "weight": chance.natural({min: 1, max: 12}) + "g"
+                            }
+                        }
+                    ]
+                },
+                headers: {
+                    "Content-Type": "application/json",
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
+                assert.ok(body.result);
+                console.log(JSON.stringify(body, null, 2));
+
+                //assert.equal(body.errors.details[0].code, 403);
+                //assert.equal(body.errors.details[0].message, "User have no cart");
+
+                done();
+            });
+        });
+
+
     });
+
+
+    describe("Testing on filled DB", function () {
+
+
+        it(' Bulk Add items', function (done) {
+
+
+            // Instantiate Chance so it can be used
+            var chance = new Chance();
+
+            var items = [];
+            var numberItems = globalMe["numberItems"] = chance.integer({min: 1, max: 20});
+
+            for (var i = 0; i < numberItems; i++) {
+                items[i] =  generateRandomItem(); //require('./validItem.js');
+                /*{
+
+                    "productId": chance.string({length: 8, pool: '1234567890'}),
+                    "title": chance.word({length: 7}),
+                    "imagePath": chance.avatar(),
+                    "price": chance.integer({min: 20, max: 2000}),
+                    "groupId": chance.string({length: 8, pool: '1234567890'}),
+                    "merchantId": chance.string({length: 8, pool: '1234567890'}),
+                    "GTIN": chance.string({length: 10, pool: '1234567890'}),
+                    "currency": "USD",
+                    "quantity": chance.integer({min: 1, max: 12}),
+                    "shippingPrice": chance.integer({min: 1, max: 70}),
+                    "shippingMethods": [
+                        {
+                            "id": 1,
+                            "methodeName": "Client Pickup",
+                            "price": chance.dollar(),
+                            "selected": "true"
+                        },
+                        {
+                            "id": 2,
+                            "methodeName": "Liban Post",
+                            "price": chance.dollar(),
+                            "selected": "false"
+                        },
+                        {
+                            "id": 3,
+                            "methodeName": "Urgent Delivery",
+                            "price": chance.dollar(),
+                            "selected": "false"
+                        }
+                    ],
+                    "filters": {
+                        "color": ["black", "white"],
+                        "weight": chance.natural({min: 1, max: 12}) + "g"
+                    }
+                };
+*/
+            }// end loop
+
+            console.log(items);
+            var params = {
+                qs: {
+                    userId: userId
+                },
+                form: {
+                    "items": items
+                },
+                headers: {
+                    "Content-Type": "application/json",
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
+                assert.ok(body.result);
+                // console.log(JSON.stringify(body, null, 2));
+                //assert.equal(body.errors.details[0].code, 403);
+                //assert.equal(body.errors.details[0].message, "User have no cart");
+
+                done();
+            });
+        });
+
+
+        it('getCart', function (done) {
+            var params = {
+                qs: {
+                    userId: userId
+                },
+                headers: {
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/getCart', 'get', function (body) {
+                assert.ok(body.result);
+                assert.equal(body.data.length, globalMe["numberItems"], body.data.length + " Items should be equal to " + globalMe["numberItems"]);
+                done();
+            });
+        });
+
+
+        it('getCarts', function (done) {
+            var params = {
+                headers: {
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/getCarts', 'get', function (body) {
+                assert.ok(body.result);
+                done();
+            });
+        });
+
+
+    });
+
+
+    describe("Testing Error messages", function () {
+
+        console.log("============================================================================== ");
+        console.log(" Now testing error messages ");
+        console.log("============================================================================== ");
+
+
+        it('getCart when no user provided', function (done) {
+            var params = {
+                headers: {
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/getCart', 'get', function (body) {
+                assert.ok(!body.result);
+                assert.ok(body.errors);
+                assert.equal(body.errors.codes[0], 172, "No user provided");
+                done();
+            });
+        });
+
+        it('getCart when fake user provided', function (done) {
+            var params = {
+                qs: {
+                    userId: "123"
+                },
+                headers: {
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/getCart', 'get', function (body) {
+                assert.ok(!body.result);
+                assert.ok(body.errors);
+                assert.equal(body.errors.codes[0], 401, "Illegal user provided");
+                done();
+            });
+        });
+
+        it('getCart when trying to use different user', function (done) {
+            console.log( "Logged out user: " + globalMe["loggedOutUser"] );
+            console.log( globalMe );
+            var params = {
+                qs: {
+                    userId: userIdOther
+                },
+                headers: {
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/getCart', 'get', function (body) {
+                console.log(JSON.stringify(body, null, 4));
+               assert.ok(!body.result);
+                assert.ok(body.errors);
+                assert.equal(body.errors.codes[0], 401, "auth key - user mismatch");
+                done();
+            });
+        });
+
+
+        it('Add missing fields items', function (done) {
+
+            // Load Chance
+            var Chance = require('chance');
+
+            // Instantiate Chance so it can be used
+            var chance = new Chance();
+
+
+            var params = {
+                qs: {
+                    userId: userId
+                },
+                form: {
+                    "items": [
+                        {
+                        }
+                    ]
+                },
+                headers: {
+                    "Content-Type": "application/json",
+                    soajsauth: soajsauth
+                }
+            };
+            executeMyRequest(params, 'cart/setCart', 'post', function (body) {
+                assert.ok(!body.result);
+                console.log(JSON.stringify(body, null, 2));
+
+                //assert.equal(body.errors.details[0].code, 403);
+                //assert.equal(body.errors.details[0].message, "User have no cart");
+
+                done();
+            });
+        });
+
+
+
+
+    });//Testing Error messages"
+
+
 });

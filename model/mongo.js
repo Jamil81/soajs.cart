@@ -48,7 +48,6 @@ module.exports = {
             "created": curTime
 
         };
-
         if (myUrac.tenant && myUrac.tenant.id) {
 
             input["tenantid"] = myUrac.tenant.id;
