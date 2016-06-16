@@ -1,0 +1,41 @@
+{
+  "name": "soajs.cart",
+  "description": "soajs Jamil Shopping Cart",
+  "version": "0.0.1",
+  "author": {
+    "name": "Jamil Abdallah",
+    "email": "jamil@soajs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Jamil81/soajs.cart.git"
+  },
+  "license" : "Apache-2.0",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "soajs.controller": "0.2.*",
+    "soajs.urac": "0.2.*",
+    "grunt":"0.4.5",
+    "grunt-contrib-jshint":"*",
+    "grunt-jsdoc" : "*",
+    "grunt-contrib-clean" : "*",
+    "grunt-mocha-test" : "*",
+    "grunt-env" : "*",
+    "grunt-istanbul" : "*",
+    "grunt-coveralls" : "*",
+    "jshint": "*",
+    "lodash": "*",
+    "mocha": "*",
+    "request": "*",
+    "shelljs": "*"
+  },
+  "dependencies":{
+    "chance": "*",
+    "soajs": "0.3.*"
+  }
+}
