@@ -17,7 +17,8 @@ module.exports = {
         400: "Failed to connect to Database", // unknown db connection error
         401: "Thou shall not pass (Invalid user Id provided)", //user id does not match the logged in user
         402: "Y u no login?!!!!",//invalid login,
-        403: "Cart is empty" //deprecated
+        403: "Cart is empty", //deprecated,
+        407: "Internal Server Error"
     },
     "schema": {
 
@@ -28,6 +29,15 @@ module.exports = {
                 "validation": {
                     "type": "string"
                 }
+            },
+            "model": {
+                "source": ['query.model'],
+                "required": false,
+                "default": "mongo",
+                "validation": {
+                    "type": "string",
+                    "enum": ["testModel" , "mongo"]
+                }
             }
         },
 
@@ -36,7 +46,7 @@ module.exports = {
                 "l": "Get all items of a given user cart",
                 "group": "Basic"
             },
-            "commonFields": ["userId"]
+            "commonFields": ["userId", "model"]
         },
 
         "/cart/setCart": {
@@ -44,7 +54,7 @@ module.exports = {
                 "l": "Add items to cart",
                 "group": "Basic"
             },
-            "commonFields": ["userId"],
+            "commonFields": ["userId", "model"],
             // reset the cart or add items to the old ones
             "add" : {
                 "source": ['query.add'],
@@ -77,7 +87,7 @@ module.exports = {
                 "l": "empty cart",
                 "group": "Basic"
             },
-            "commonFields": ["userId"]
+            "commonFields": ["userId", "model"]
         },//emptyCart
 
         "/cart/getCarts":{
@@ -101,7 +111,8 @@ module.exports = {
                 "validation": {
                     "type": "integer"
                 }
-            }
+            },
+            "commonFields": [ "model"]
         }//getCarts
 
     }//schema,
