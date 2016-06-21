@@ -1,7 +1,3 @@
-/**
- * for testing
- * user: jamil id: 57592d0d37648aeb0231504e
- */
 'use strict';
 var Mongo = require('soajs').mongo;
 var mongo;
@@ -57,10 +53,6 @@ module.exports = {
 		var userId = soajs.session.getUrac()._id.toString();
 
 		mongo.count(collName, {"user.id": userId}, function (error, count) {
-			/*
-			if (error) {
-				return cb(error);
-			}*/
 			if (!count) {
 				return cb(null, true);
 			}
