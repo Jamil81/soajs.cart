@@ -77,7 +77,7 @@ module.exports = function (grunt) {
 					"after": false,
 					"afterEach": false
 				},
-				ignores: ['test/coverage/**/*.js' , 'data/shoppingCart/**/*.js']
+				ignores: ['test/coverage/**/*.js' , 'data/shoppingCart/**/*.js', 'ui/**/*.js']
 			},
 			files: {
 				src: ['**/*.js']
