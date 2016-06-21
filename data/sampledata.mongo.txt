@@ -104,10 +104,5 @@
  }
 
 
-// creating indexes
-db.carts.createIndex( { tenantid: 1 } );
-db.carts.createIndex( { user.id: 1 }, { unique: true } );
-db.carts.createIndex( { items.productId: 1 } );
-
 
 
