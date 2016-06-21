@@ -28,14 +28,12 @@ files = listFiles('./users');
 for( i = 0; i < files.length; i++) {
 	load(files[i].name);
 }
-
 ddbT.users.drop();
  records = [];
 records.push(user1);
 // records.push(user3);
 records.push(user2);
 ddbT.users.insert(records);
-
 
 /* Indexes for users */
 ddbT.users.ensureIndex({username: 1}, {unique: true});
