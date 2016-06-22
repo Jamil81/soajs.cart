@@ -30,15 +30,22 @@ module.exports = {
                     "type": "string"
                 }
             },
-            "model": {
-                "source": ['query.model'],
-                "required": false,
-                "default": "mongo",
-                "validation": {
-                    "type": "string",
-                    "enum": ["testModel" , "mongo"]
-                }
-            }
+	        "model": {
+		        "source": ['query.model'],
+		        "required": false,
+		        "default": "mongo",
+		        "validation": {
+			        "type": "string",
+			        "enum": ["testModel" , "mongo"]
+		        }
+	        },
+	        "dbname": {
+		        "source": ['query.dbname'],
+		        "required": false,
+		        "validation": {
+			        "type": "string"
+		        }
+	        }
         },
 
         "/cart/getCart": {
@@ -46,7 +53,7 @@ module.exports = {
                 "l": "Get all items of a given user cart",
                 "group": "Basic"
             },
-            "commonFields": ["userId", "model"]
+            "commonFields": ["userId", "model","dbname"]
         },
 
         "/cart/setCart": {
@@ -54,7 +61,7 @@ module.exports = {
                 "l": "Add items to cart",
                 "group": "Basic"
             },
-            "commonFields": ["userId", "model"],
+            "commonFields": ["userId", "model","dbname"],
             // reset the cart or add items to the old ones
             "add" : {
                 "source": ['query.add'],
@@ -87,7 +94,7 @@ module.exports = {
                 "l": "empty cart",
                 "group": "Basic"
             },
-            "commonFields": ["userId", "model"]
+            "commonFields": ["userId", "model","dbname"]
         },//emptyCart
 
         "/cart/getCarts":{
@@ -112,7 +119,7 @@ module.exports = {
                     "type": "integer"
                 }
             },
-            "commonFields": [ "model"]
+            "commonFields": [ "model","dbname"]
         }//getCarts
 
     }//schema,

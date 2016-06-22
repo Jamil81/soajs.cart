@@ -4,6 +4,7 @@ module.exports = function(name, prefix) {
 	return {
 		"name": name,
 		"prefix": prefix,
+
 		"servers": [
 			{
 				"host": "127.0.0.1",

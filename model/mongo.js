@@ -6,6 +6,10 @@ var dbName = "shoppingcart";
 var collName = "carts";
 
 function checkIfMongo(soajs) {
+	if(  soajs.inputmaskData.dbname)
+	{
+		dbName =  soajs.inputmaskData.dbname;
+	}
 	if (!mongo) {
 		mongo = new Mongo(soajs.registry.coreDB[dbName]);
 	}

@@ -53,6 +53,10 @@ var dev = {
 			"shoppingcart": {
 				"cluster": "cluster1",
 				"tenantSpecific": false
+			},
+			"test_shoppingcart": {
+				"cluster": "cluster1",
+				"tenantSpecific": false
 			}
 		}
 	},

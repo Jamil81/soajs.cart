@@ -5,7 +5,7 @@ var request = require("request");
 var Chance = require('chance');
 
 var helper = require("../helper");
-var config = helper.requireModule('./config');
+// var config = helper.requireModule('./config');
 var extKey = helper.getKey();
 var mongo = helper.getMongo();
 
@@ -85,6 +85,13 @@ function executeMyRequest(params, apiPath, method, cb) {
 		if (params.qs) {
 			options.qs = params.qs;
 		}
+		else
+		{
+			options.qs = {};
+		}
+
+		options.qs.dbname = "test_shoppingcart";
+
 
 		request[method](options, function (error, response, body) {
 			assert.ifError(error);
@@ -157,11 +164,10 @@ describe("Testing Service APIs", function () {
 				}
 			};
 			executeMyRequest(params, 'cart/emptyCart', 'del', function (body) {
+				console.log(JSON.stringify(body, null, 2));
 				assert.ok(body.result);
 				assert.ok(!body.errors);
 				assert.equal(body.result, true);
-				console.log(JSON.stringify(body, null, 2));
-
 				//assert.equal(body.errors.details[0].code, 403);
 				//assert.equal(body.errors.details[0].message, "User have no cart");
 
@@ -225,6 +231,23 @@ describe("Testing Service APIs", function () {
 			});
 		});
 
+		it('select dbname', function (done) {
+			var params = {
+				qs: {
+					userId: userId,
+					dbname: "test_shoppingcart"
+				},
+				headers: {
+					soajsauth: soajsauth
+				}
+			};
+			executeMyRequest(params, 'cart/emptyCart', 'del', function (body) {
+				assert.ok(body.result);
+				assert.ok(!body.errors);
+				done();
+			});
+		});
+
 
 		it('No cart', function (done) {
 			var params = {
@@ -237,17 +260,18 @@ describe("Testing Service APIs", function () {
 			};
 			mongo.testCase.remove('carts', {"user.id": userId}, function (error) {
 				assert.ifError(error);
+				console.log("Removed the carts  of user: " + userId);
+				console.log( mongo.testCase );
 				executeMyRequest(params, 'cart/emptyCart', 'del', function (body) {
 					console.log("-------");
 					console.log(body);
+					//process.exit(0);
 					done();
 				});
 			});
 		});
 
-
 	});
-
 
 	describe("Testing Actions on empty data", function () {
 
@@ -338,45 +362,7 @@ describe("Testing Service APIs", function () {
 			var numberItems = globalMe["numberItems"] = chance.integer({min: 1, max: 20});
 
 			for (var i = 0; i < numberItems; i++) {
-				items[i] = generateRandomItem(); //require('./validItem.js');
-				/*{
-
-				 "productId": chance.string({length: 8, pool: '1234567890'}),
-				 "title": chance.word({length: 7}),
-				 "imagePath": chance.avatar(),
-				 "price": chance.integer({min: 20, max: 2000}),
-				 "groupId": chance.string({length: 8, pool: '1234567890'}),
-				 "merchantId": chance.string({length: 8, pool: '1234567890'}),
-				 "GTIN": chance.string({length: 10, pool: '1234567890'}),
-				 "currency": "USD",
-				 "quantity": chance.integer({min: 1, max: 12}),
-				 "shippingPrice": chance.integer({min: 1, max: 70}),
-				 "shippingMethods": [
-				 {
-				 "id": 1,
-				 "methodeName": "Client Pickup",
-				 "price": chance.dollar(),
-				 "selected": "true"
-				 },
-				 {
-				 "id": 2,
-				 "methodeName": "Liban Post",
-				 "price": chance.dollar(),
-				 "selected": "false"
-				 },
-				 {
-				 "id": 3,
-				 "methodeName": "Urgent Delivery",
-				 "price": chance.dollar(),
-				 "selected": "false"
-				 }
-				 ],
-				 "filters": {
-				 "color": ["black", "white"],
-				 "weight": chance.natural({min: 1, max: 12}) + "g"
-				 }
-				 };
-				 */
+				items[i] = generateRandomItem();
 			}// end loop
 
 			console.log(items);

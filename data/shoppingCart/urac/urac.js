@@ -1,4 +1,4 @@
-var ddb = db.getSiblingDB('test_urac');
+var ddb = db.getSiblingDB('cart_urac');
 //provDb.dropDatabase();
 
 /* Tenants */
@@ -21,7 +21,7 @@ ddb.users.ensureIndex({email: 1}, {unique: true});
 
 
 /* new tenant db*/
-var ddbT = db.getSiblingDB('TNT1_urac');
+var ddbT = db.getSiblingDB('cart_urac');
 
 /* Tenants */
 files = listFiles('./users');

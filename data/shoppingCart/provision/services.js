@@ -1,4 +1,4 @@
-var provDb = db.getSiblingDB('core_provision');
+var provDb = db.getSiblingDB('cart_core_provision');
 
 var files = listFiles('./services');
 for(var i = 0; i < files.length; i++) {

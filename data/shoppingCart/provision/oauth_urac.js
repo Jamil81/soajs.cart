@@ -1,4 +1,4 @@
-var provDb = db.getSiblingDB('core_provision');
+var provDb = db.getSiblingDB('cart_core_provision');
 
 /* oAuth URAC */
 var files = listFiles('./oauth_urac');

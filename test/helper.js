@@ -19,9 +19,12 @@ module.exports = {
         if (!mongo) {
             // define your db connections
             mongo = {};
-            mongo.testCase = new Mongo(registry("shoppingcart", ""));
-            mongo.core = new Mongo(registry("core_provision", ""));
-            mongo.urac = new Mongo(registry("TNT1_urac", ""));
+	        console.log("Loading cart now");
+            mongo.testCase = new Mongo(registry("test_shoppingcart", ""));
+	        console.log("Loading provision now");
+            mongo.core = new Mongo(registry("core_provision", "cart"));
+	        console.log("Loading urac now");
+            mongo.urac = new Mongo(registry("urac", "cart"));
         }
         return mongo;
     },
