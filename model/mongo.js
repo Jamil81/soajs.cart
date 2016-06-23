@@ -84,7 +84,7 @@ module.exports = {
 		checkIfMongo(soajs);
 
 		var curTime = new Date().getTime();
-		var userId = soajs.inputmaskData.dbname;
+		var userId = soajs.inputmaskData.userId;
 		var username = soajs.inputmaskData.username;
 		var tenantId = soajs.inputmaskData.tenantId;
 

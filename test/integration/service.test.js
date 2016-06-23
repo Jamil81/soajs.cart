@@ -104,6 +104,7 @@ function executeMyRequest(params, apiPath, method, cb) {
 describe("Testing Service APIs", function () {
 	var soajsauth;
 	var userId;
+	var tenantId;
 	before(function (done) {
 		console.log("------------------------ About to Run Tests for SOAJS.CART ------------------------");
 		done();
@@ -144,6 +145,7 @@ describe("Testing Service APIs", function () {
 			assert.ok(body.soajsauth);
 			console.log(JSON.stringify(body.data, null, 2));
 			userId = body.data._id.toString();
+			tenantId = body.data.tenant.id.toString();
 			// ****** add this to the headers, for example if you need all you subsequent tests to be in private mode
 			soajsauth = body.soajsauth;
 			done();
@@ -517,7 +519,43 @@ describe("Testing Service APIs", function () {
 	});
 
 
-	describe("Full Testing set Cart API:", function () {
+	describe("Testing administrator services:", function () {
+
+
+		it(' Bulk Add items to existing user', function (done) {
+			// Instantiate Chance so it can be used
+			var chance = new Chance();
+			var items = [];
+			var numberItems = globalMe["numberItems"] = chance.integer({min: 2, max: 20});
+
+			for (var i = 0; i < numberItems; i++) {
+				items[i] = generateRandomItem();
+			}// end loop
+
+			console.log(items);
+			var params = {
+				qs: {
+					userId: '54ee1a511856706c23639308',//alt usr userId,
+					tenantId: tenantId
+				},
+				form: {
+					"items": items
+				},
+				headers: {
+					"Content-Type": "application/json",
+					soajsauth: soajsauth
+				}
+			};
+			executeMyRequest(params, 'cart/addCart', 'post', function (body) {
+				assert.ok(body.result);
+				 console.log(JSON.stringify(body, null, 2));
+				//assert.equal(body.errors.details[0].code, 403);
+				//assert.equal(body.errors.details[0].message, "User have no cart");
+
+				done();
+			});
+		});
+
 
 	});
 
