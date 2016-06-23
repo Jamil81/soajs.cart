@@ -120,7 +120,40 @@ module.exports = {
                 }
             },
             "commonFields": [ "model","dbname"]
-        }//getCarts
+        },//getCarts
+
+
+	    "/cart/addCart": {
+		    "_apiInfo": {
+			    "l": "Add a cart for any given user",
+			    "group": "Basic"
+		    },
+		    "commonFields": ["userId", "model","dbname"],
+
+		    "tenantId": {
+			    "source": ['query.tenantId'],
+			    "required": true,
+			    "validation": {
+				    "type": "string"
+			    }
+		    },
+		    "items": {
+			    "source": ['body.items'],
+			    "validation": {
+				    "type": "array",
+				    "items": {
+					    "type": "object",
+					    "properties": itemProp
+				    },
+				    "minItems": 0,
+				    "uniqeItems": true,
+				    "additionalItems": false
+			    }// validation
+
+
+		    }//items
+	    },//set cart
+
 
     }//schema,
 };//exports;

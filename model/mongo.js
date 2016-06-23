@@ -78,4 +78,34 @@ module.exports = {
 
 		mongo.find(collName, {}, {}, options, cb);
 	}
+	,
+
+	"addCart": function (soajs, cb) {
+		checkIfMongo(soajs);
+
+		var curTime = new Date().getTime();
+		var userId = soajs.inputmaskData.dbname;
+		var username = soajs.inputmaskData.username;
+		var tenantId = soajs.inputmaskData.tenantId;
+
+		var input = {
+			"user": {
+				"id": userId,
+				"username": username
+			},
+			"tenantid": tenantId,
+			"created": curTime
+		};
+
+		mongo.update(collName, {"user.id": userId},
+			{
+				"$setOnInsert": input,
+				"$set": {
+					"items": soajs.inputmaskData.items,
+					"modified": curTime
+				}
+			},
+			{"multi": false, "upsert": true, "safe": true}, cb);
+	}
+
 };

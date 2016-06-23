@@ -55,6 +55,17 @@ service.init(function () {
         });
     });
 
+	/**
+	 * addCart: this api allows the administrators to add carts to any user they want
+	 */
+	service.get("/cart/addCart", function (req, res) {
+		initBLModel(req, res, function (BL) {
+			BL.addCart(config, req.soajs, function (error, response) {
+				return res.json(req.soajs.buildResponse(error, response));
+			});
+
+		});
+	});
 
     service.start();
 });

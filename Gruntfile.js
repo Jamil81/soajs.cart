@@ -100,6 +100,7 @@ module.exports = function (grunt) {
 				// for example stop emails
 				NODE_ENV: 'test',
 				SOAJS_ENV: 'dev',
+				SOAJS_PROFILE:'/opt/soajs/node_modules/soajs.cart/profile/test.js',
 				SOAJS_DAEMON_GRP_CONF: "testCase",
 				APP_DIR_FOR_CODE_COVERAGE: '../test/coverage/instrument/',
 				SOAJS_SRVIP: '127.0.0.1'

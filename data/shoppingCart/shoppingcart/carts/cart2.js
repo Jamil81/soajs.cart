@@ -21,7 +21,7 @@ var cart2 = {
 		"currency": "USD",
 		"quantity": 1,
 		"shippingPrice": "0",
-		"shippingMethod": [
+		"shippingMethods": [
 			{
 				"id": 1,
 				"methodeName": "Client Pickup",

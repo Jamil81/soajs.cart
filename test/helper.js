@@ -22,9 +22,9 @@ module.exports = {
 	        console.log("Loading cart now");
             mongo.testCase = new Mongo(registry("test_shoppingcart", ""));
 	        console.log("Loading provision now");
-            mongo.core = new Mongo(registry("core_provision", "cart"));
+            mongo.core = new Mongo(registry("core_provision", "cart_"));
 	        console.log("Loading urac now");
-            mongo.urac = new Mongo(registry("urac", "cart"));
+            mongo.urac = new Mongo(registry("urac", "cart_"));
         }
         return mongo;
     },

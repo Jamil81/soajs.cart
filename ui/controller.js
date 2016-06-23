@@ -36,7 +36,7 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 						myItems += myItems != "" ? "," : "";
 						console.log(item);
 						$scope.data[inc].itemsCount = $scope.data[inc].itemsCount ? $scope.data[inc].itemsCount + 1 : 1;// ja this should sbe reducable
-						myItems += item.quantity + " " + item.title + (item.quantity > 0 ? "(s)" : "");
+						myItems += item.quantity + " " + item.title + (item.quantity > 1 ? "(s)" : "");
 					});
 					$scope.data[inc].items = myItems;
 				}
