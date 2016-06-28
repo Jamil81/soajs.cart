@@ -101,21 +101,25 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 	};
 
 	//function that adds a new entry by using form & modal
-	$scope.addCart = function () {
+	$scope.addCart = function (data) {
 		if ($scope.access.addCart) {
+			console.log( data );
+
+			$scope.data = data? data : {};
+			var flag =$scope.editMode = data ? true : false;
+			$scope.countItems = flag ? data.itemsCount : 0;
+
+
 			var submit = function (formData) {  //operation function, returns the data entered in the form
-
-
-				 // to be taken from post data bas zida
-				var count = 1;
+				console.log( formData);
+				var count =  $scope.countItems;
+				console.log("Count items is: "+ count);
 				var itemattr = shoppingCartSrv.getItemAttributes();
-				var newItems = [];
+				var newItems = [];// always reseted since in the form all data old and new be with you
 				console.log( itemattr );
 				for (var index = 0; index < count; index++) {
 					newItems[index] ={};
 					itemattr.forEach(function (attr) {
-						console.log(attr + '-' + index);
-						console.log(formData[attr + '-' + index]);
 						/* it should be jasoned now
 						if( attr == "shippingMethods" ||  attr == "filters"  ){
 							newItems[index]["shippingMethods"] = JSON.parse(formData["shippingMethods" + '-' + index]),
@@ -127,18 +131,20 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 					});
 				}
 
-				console.log( newItems );
 				formData.items = newItems;
 
-				console.log("form Data is: ");
-				console.log(formData);
+				if($scope.editMode)
+				{
+					formData.tenantId = data.tenantid;
+					formData.userId = data.user.id;
+				}
 				var opts = {
 					routeName: "/shoppingCart/cart/addcart",
 					method: "send",
 					data: formData,
 					"params": {
-						"userId": $scope.form.formData.userId
-						, "tenantId": $scope.form.formData.tenantId
+						"userId": formData.userId
+						, "tenantId": formData.tenantId
 					}
 				};
 				shoppingCartSrv.sendEntryToAPI($scope, ngDataApi, opts, function (error) {
@@ -160,7 +166,6 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 			});
 		}
 	};
-
 
 	/**
 	 * ( not functional yet )

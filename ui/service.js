@@ -18,8 +18,22 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 	*/
 
 
-	function cloneItem(index) {
+	function cloneItem(index, data) {
 
+		data = data? data : {
+			"productId" : "",
+			"groupId" : "",
+			"merchantId" : "",
+			"GTIN" : "",
+			"title" : "",
+			"imagePath" : "",
+			"price" : 0,
+			"currency" : "$",
+			"quantity" :0,
+			"shippingPrice" : 0,
+			"shippingMethods" : [],
+			"filters" : {}
+		};
 		var obj = [
 			{
 				"name": 'removeItem'+  '-' + index,
@@ -48,7 +62,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'placeholder': '',
 				'required': true,
 				"minLength": 8,
-				"maxLength": 8
+				"maxLength": 8,
+				"value": data.productId
 			},
 			{
 				'name': 'groupId' + '-' + index,
@@ -57,7 +72,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'placeholder': '',
 				'required': true,
 				"minLength": 8,
-				"maxLength": 8
+				"maxLength": 8,
+				"value": data.groupId
 			},
 			{
 				'name': 'merchantId' + '-' + index,
@@ -66,7 +82,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'placeholder': '',
 				'required': true,
 				"minLength": 8,
-				"maxLength": 8
+				"maxLength": 8,
+				"value": data.merchantId
 			},
 			{
 				'name': 'GTIN' + '-' + index,
@@ -75,7 +92,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'placeholder': '',
 				'required': true,
 				"minLength": 10,
-				"maxLength": 10
+				"maxLength": 10,
+				"value": data.GTIN
 			},
 			{
 				'name': 'title' + '-' + index,
@@ -83,14 +101,16 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'type': 'text',
 				'placeholder': 'Product_Title',
 				'required': true,
-				"minLength": 5
+				"minLength": 5,
+				"value": data.title
 			},
 			{
 				'name': 'imagePath' + '-' + index,
 				'label': 'Image Path',
 				'type': 'text',
 				'placeholder': '',
-				'required': true
+				'required': true,
+				"value": data.imagePath
 			},
 			{
 				'name': 'price' + '-' + index,
@@ -98,26 +118,30 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'type': 'number',
 				'placeholder': '',
 				'required': true,
-				"min": 0
+				"min": 0,
+				"value": data.price
 			},
 			{
 				'name': 'currency' + '-' + index,
 				'label': 'Currency',
-				'type': 'text'
+				'type': 'text',
+				"value": data.currency
 			},
 			{
 				'name': 'quantity' + '-' + index,
 				'label': 'Quantity',
 				'type': 'number',
 				'required': true,
-				"min": 0
+				"min": 0,
+				"value": data.quantity
 			},
 			{
 				'name': 'shippingPrice' + '-' + index,
 				'label': 'Shipping Price',
 				'type': 'number',
 				'placeholder': '',
-				'required': true
+				'required': true,
+				"value": data.quantity
 			},
 			{
 				'name': 'shippingMethods' + '-' + index,
@@ -129,7 +153,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 					'availableModes': [{'v': 'code', 'l': 'Code View'}, {'v': 'tree', 'l': 'Tree View'}, {'v': 'form', 'l': 'Form View'}]
 				},
 				'height': '200px',
-				'required': true
+				'required': true,
+				"value": data.shippingMethods
 			},
 			{
 				'name': 'filters' + '-' + index,
@@ -140,7 +165,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 					'availableModes': [{'v': 'code', 'l': 'Code View'}, {'v': 'tree', 'l': 'Tree View'}, {'v': 'form', 'l': 'Form View'}]
 				},
 				'height': '200px',
-				'required': true
+				'required': true,
+				"value": data.filters
 			}
 
 		];
@@ -183,6 +209,11 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 						'icon': 'search',
 						'label': 'View Cart',
 						'handler': 'viewEntry'
+					},
+					{
+						'icon': 'pencil2',
+						'label': 'Edit Cart',
+						'handler': 'addCart'
 					}
 				]
 			};
@@ -190,10 +221,14 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 		},
 
 		'buildForm': function ($scope, $modal, submitAction) {
+			console.log ($scope.data) ;console.log("____");
+
+			console.log( "teneant id:" + $scope.data.tenantid);
 			var config = {
 				"timeout": $timeout,
 				"form": {
 					"entries": [
+
 						{
 							'name': 'tenantId',
 							'label': 'Tenants',
@@ -213,15 +248,17 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 								});
 							}
 						},
+
 						{
 							'name': 'userId',
 							'label': 'Users',
 							'type': 'select',
 							'placeholder': 'Choose a user',
-							'value': $scope.users,
+							'value':  $scope.users,
 							'tooltip': 'Select user( should select tenant first )',
 							'required': true
 						},
+
 
 						{
 							'name': 'items',
@@ -236,7 +273,8 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 							"name": "addItem",
 							"type": "html",
 							"value": '<span class=""><input type="button" class="btn btn-sm btn-success" value="Add New Item"></span>'
-						},
+
+						}
 					]
 				},
 				"name": 'addCart',
@@ -260,8 +298,38 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 					}
 				]
 			};
+			if( $scope.editMode )
+			{
+				var $head =
+				{
+					"name": "head",
+					"type": "html",
+					"value": '<span class="">Tenant: '+$scope.data.tenantid+'</span><br>' +
+					'<span class="">user: '+$scope.data.user.name + '(' + $scope.data.user.id +')</span>'
+
+
+				};
+
+				config.form.entries.splice(0,2,$head);
+			}
 			var formConf = config.form;
-			var count = 0;
+			var count =0;// $scope.countItems;
+
+			if ( $scope.editMode )
+			{
+				var itemData = $scope.data.raw.items;
+				itemData.forEach( function (item)
+				{
+					var oneClone = cloneItem(count,item);
+					config.form.entries.forEach(function (entry) {
+						if (entry.name === 'items' && entry.type === 'group') {
+							entry.entries = entry.entries.concat(oneClone);
+						}
+					});
+					$scope.countItems=++count;
+				});
+
+			}
 			function addItem(cb)
 			{
 				formConf.entries.forEach(function (entry) {
@@ -273,17 +341,23 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 									entry.entries = entry.entries.concat(oneClone);
 								}
 							});
-							count++;//no need
+							$scope.countItems=++count;
 						};
 					}
 				});
 				cb();
 			}
 			//call buildForm
-			addItem( function (){
+			if( $scope.editMode )
+			{
 				buildFormWithModal($scope, $modal, config );
-				// after form built console.log($scope.form.entries); will be the valid scope
-			});// create one empty item
+			}
+			else{
+				addItem( function (){
+					buildFormWithModal($scope, $modal, config );
+					// after form built console.log($scope.form.entries); will be the valid scope
+				});// create one empty item
+			}
 		}
 	}
 }]);
