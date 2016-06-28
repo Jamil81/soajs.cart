@@ -16,6 +16,8 @@
 </script>
 <section ng-controller="shoppingCartCtrl">
     <div>
+        <!-- if scope.access.add is allowed, show button-->
+        <input type="button" value="Add New Cart" ng-click="addCart();" ng-if="access.addCart" class="btn btn-primary btn-sm"/>
         <!-- UI Grid directive -->
         <nglist></nglist>
     </div>

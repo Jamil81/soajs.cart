@@ -85,13 +85,13 @@ module.exports = {
 
 		var curTime = new Date().getTime();
 		var userId = soajs.inputmaskData.userId;
-		var username = soajs.inputmaskData.username;
+		//var username = soajs.inputmaskData.username;
 		var tenantId = soajs.inputmaskData.tenantId;
 
 		var input = {
 			"user": {
 				"id": userId,
-				"username": username
+				/*"username": username*/
 			},
 			"tenantid": tenantId,
 			"created": curTime
