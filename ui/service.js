@@ -3,56 +3,72 @@ var shoppingCartService = soajsApp.components;
 shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($timeout, $http) {
 
 	/*
-	ja: estgnayna 3n jhdmetik
-	function callAPI(config, callback) {
-		$http(config).success(function (response, status, headers, config) {
-			$timeout(function () {
-				return callback(null, response);
-			}, 500);
-		}).error(function (errData, status, headers, config) {
-			$timeout(function () {
-				return callback(errData);
-			}, 500);
-		});
-	}
-	*/
+	 ja: estgnayna 3n jhdmetik
+	 function callAPI(config, callback) {
+	 $http(config).success(function (response, status, headers, config) {
+	 $timeout(function () {
+	 return callback(null, response);
+	 }, 500);
+	 }).error(function (errData, status, headers, config) {
+	 $timeout(function () {
+	 return callback(errData);
+	 }, 500);
+	 });
+	 }
+	 */
 
 
 	function cloneItem(index, data) {
 
-		data = data? data : {
-			"productId" : "",
-			"groupId" : "",
-			"merchantId" : "",
-			"GTIN" : "",
-			"title" : "",
-			"imagePath" : "",
-			"price" : 0,
-			"currency" : "$",
-			"quantity" :0,
-			"shippingPrice" : 0,
-			"shippingMethods" : [],
-			"filters" : {}
+		data = data ? data : {
+			"productId": "",
+			"groupId": "",
+			"merchantId": "",
+			"GTIN": "",
+			"title": "",
+			"imagePath": "",
+			"price": 0,
+			"currency": "$",
+			"quantity": 0,
+			"shippingPrice": 0,
+			"shippingMethods": [],
+			"filters": {}
 		};
 		var obj = [
 			{
-				"name": 'removeItem'+  '-' + index,
+				"name": 'removeItem' + '-' + index,
 				"type": "html",
 				"value": "<span class='red'><span class='icon icon-cross' title='Remove'></span></span>",
 				"onAction": function (id, data, form) {
 					console.log("Delete called ");
 
 					// need to decrease count
-					var itemattr = getItemAttributes();
-					console.log(   form.formData );// this one retuens olny the tenant and the user and not the items
+					var itemattr = ret.getItemAttributes();
 					itemattr.forEach(function (attr) {
-						console.log(attr);
-						console.log(form.formData[attr+'-'+index]);
-						console.log("__________________");
-						console.log(form.formData[attr+'-'+index]);
-						delete form.formData[attr+'-'+index];
+						delete form.formData[attr + '-' + index];
 					});
-					console.log(   form.formData );
+					delete form.formData['removeItem-' + index];
+
+
+					// well this work, but should never be used...
+					form.entries.forEach(function (oneEntry) {
+						if (oneEntry.type === 'group' && oneEntry.name === 'items') {
+							console.log(oneEntry);
+							for (var i = oneEntry.entries.length - 1; i >= 0; i--) {
+
+								itemattr.forEach(function (attr) {
+									if (oneEntry.entries[i].name === (attr + '-' + index)) {
+										oneEntry.entries.splice(i, 1);
+									}
+									else if (oneEntry.entries[i].name === 'removeItem-' + index) {
+										oneEntry.entries.splice(i, 1);
+									}
+
+								});
+
+							}
+						}
+					});
 				}
 			},
 			{
@@ -150,7 +166,10 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'type': 'jsoneditor',
 				'options': {
 					'mode': 'code',
-					'availableModes': [{'v': 'code', 'l': 'Code View'}, {'v': 'tree', 'l': 'Tree View'}, {'v': 'form', 'l': 'Form View'}]
+					'availableModes': [{'v': 'code', 'l': 'Code View'}, {'v': 'tree', 'l': 'Tree View'}, {
+						'v': 'form',
+						'l': 'Form View'
+					}]
 				},
 				'height': '200px',
 				'required': true,
@@ -162,7 +181,10 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 				'type': 'jsoneditor',
 				'options': {
 					'mode': 'code',
-					'availableModes': [{'v': 'code', 'l': 'Code View'}, {'v': 'tree', 'l': 'Tree View'}, {'v': 'form', 'l': 'Form View'}]
+					'availableModes': [{'v': 'code', 'l': 'Code View'}, {'v': 'tree', 'l': 'Tree View'}, {
+						'v': 'form',
+						'l': 'Form View'
+					}]
 				},
 				'height': '200px',
 				'required': true,
@@ -173,20 +195,19 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 		return obj;
 	}
 
-	return {
+	var ret = {
 
 		/**
 		 * get the list of the item attributes
 		 * it makes code shorter to just loop over them and not hardcode them each time,
 		 * @returns {string[]}
 		 */
-		 getItemAttributes:function ()
-		{
+		getItemAttributes: function () {
 			return [
-				'productId','groupId','merchantId','GTIN','title','imagePath','price','currency','quantity','shippingPrice','shippingMethods','filters'
+				'productId', 'groupId', 'merchantId', 'GTIN', 'title', 'imagePath', 'price', 'currency', 'quantity', 'shippingPrice', 'shippingMethods', 'filters'
 			];
 		},
-		'sendEntryToAPI': function ($scope,ngDataApi, opts, callback) {
+		'sendEntryToAPI': function ($scope, ngDataApi, opts, callback) {
 
 			getSendDataFromServer($scope, ngDataApi, opts, callback);
 
@@ -221,9 +242,10 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 		},
 
 		'buildForm': function ($scope, $modal, submitAction) {
-			console.log ($scope.data) ;console.log("____");
+			console.log($scope.data);
+			console.log("____");
 
-			console.log( "teneant id:" + $scope.data.tenantid);
+			console.log("teneant id:" + $scope.data.tenantid);
 			var config = {
 				"timeout": $timeout,
 				"form": {
@@ -254,7 +276,7 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 							'label': 'Users',
 							'type': 'select',
 							'placeholder': 'Choose a user',
-							'value':  $scope.users,
+							'value': $scope.users,
 							'tooltip': 'Select user( should select tenant first )',
 							'required': true
 						},
@@ -298,66 +320,61 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 					}
 				]
 			};
-			if( $scope.editMode )
-			{
+			if ($scope.editMode) {
 				var $head =
 				{
 					"name": "head",
 					"type": "html",
-					"value": '<span class="">Tenant: '+$scope.data.tenantid+'</span><br>' +
-					'<span class="">user: '+$scope.data.user.name + '(' + $scope.data.user.id +')</span>'
+					"value": '<span class="">Tenant: ' + $scope.data.tenantid + '</span><br>' +
+					'<span class="">user: ' + $scope.data.user.name + '(' + $scope.data.user.id + ')</span>'
 
 
 				};
 
-				config.form.entries.splice(0,2,$head);
+				config.form.entries.splice(0, 2, $head);
 			}
 			var formConf = config.form;
-			var count =0;// $scope.countItems;
+			var count = 0;// $scope.countItems;
 
-			if ( $scope.editMode )
-			{
+			if ($scope.editMode) {
 				var itemData = $scope.data.raw.items;
-				itemData.forEach( function (item)
-				{
-					var oneClone = cloneItem(count,item);
+				itemData.forEach(function (item) {
+					var oneClone = cloneItem(count, item);
 					config.form.entries.forEach(function (entry) {
 						if (entry.name === 'items' && entry.type === 'group') {
 							entry.entries = entry.entries.concat(oneClone);
 						}
 					});
-					$scope.countItems=++count;
+					$scope.countItems = ++count;
 				});
 
 			}
-			function addItem(cb)
-			{
+			function addItem(cb) {
+				console.log("Counr is: " + $scope.countItems)
 				formConf.entries.forEach(function (entry) {
-					if (entry.name === 'addItem'&& entry.type === 'html') {
+					if (entry.name === 'addItem' && entry.type === 'html') {
 						entry.onAction = function (id, data, form) {
-							var oneClone = cloneItem(count);
+							var oneClone = cloneItem($scope.countItems);
 							form.entries.forEach(function (entry) {
 								if (entry.name === 'items' && entry.type === 'group') {
 									entry.entries = entry.entries.concat(oneClone);
 								}
 							});
-							$scope.countItems=++count;
+							$scope.countItems = ++count;
 						};
 					}
 				});
 				cb();
 			}
+
 			//call buildForm
-			if( $scope.editMode )
-			{
-				buildFormWithModal($scope, $modal, config );
-			}
-			else{
-				addItem( function (){
-					buildFormWithModal($scope, $modal, config );
-					// after form built console.log($scope.form.entries); will be the valid scope
-				});// create one empty item
-			}
+
+			addItem(function () {
+				buildFormWithModal($scope, $modal, config);
+				// after form built console.log($scope.form.entries); will be the valid scope
+			});// create one empty item
+
 		}
 	}
+	return ret;
 }]);

@@ -103,48 +103,46 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 	//function that adds a new entry by using form & modal
 	$scope.addCart = function (data) {
 		if ($scope.access.addCart) {
-			console.log( data );
+			console.log(data);
 
-			$scope.data = data? data : {};
-			var flag =$scope.editMode = data ? true : false;
+			$scope.data = data ? data : {};
+			var flag = $scope.editMode = data ? true : false;
 			$scope.countItems = flag ? data.itemsCount : 0;
 
 
 			var submit = function (formData) {  //operation function, returns the data entered in the form
-				console.log( formData);
-				var count =  $scope.countItems;
-				console.log("Count items is: "+ count);
+				console.log(formData);
+				var count = $scope.countItems;
+				console.log("Count items is: " + count);
 				var itemattr = shoppingCartSrv.getItemAttributes();
 				var newItems = [];// always reseted since in the form all data old and new be with you
-				console.log( itemattr );
 				for (var index = 0; index < count; index++) {
-					newItems[index] ={};
-					itemattr.forEach(function (attr) {
-						/* it should be jasoned now
-						if( attr == "shippingMethods" ||  attr == "filters"  ){
-							newItems[index]["shippingMethods"] = JSON.parse(formData["shippingMethods" + '-' + index]),
-							newItems[index]["filters"] = JSON.parse(formData["filters" + '-' + index]);
-						}else
-						*/
-						newItems[index][attr] = formData[attr + '-' + index];
+					if (formData['removeItem-' + index]) {
+						console.log(formData['removeItem-' + index]);
+						newItems[index] = {};
+						itemattr.forEach(function (attr) {
+							newItems[index][attr] = formData[attr + '-' + index];
 
-					});
+						});
+					}
 				}
 
 				formData.items = newItems;
 
-				if($scope.editMode)
-				{
+				if ($scope.editMode) {
 					formData.tenantId = data.tenantid;
 					formData.userId = data.user.id;
 				}
+				var username=  $scope.users.filter(function(value){ return value.v==formData.userId;})
+
 				var opts = {
 					routeName: "/shoppingCart/cart/addcart",
 					method: "send",
 					data: formData,
 					"params": {
-						"userId": formData.userId
-						, "tenantId": formData.tenantId
+						"userId": formData.userId,
+						"userName":username[0].l,
+						"tenantId": formData.tenantId
 					}
 				};
 				shoppingCartSrv.sendEntryToAPI($scope, ngDataApi, opts, function (error) {
@@ -196,14 +194,16 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 	}
 
 
+
+
 	$scope.getusers = function (tenantId, callback) {
 		getSendDataFromServer($scope, ngDataApi, {
 			"method": "get",
-			"routeName": "/dashboard/tenant/oauth/users/list",
-			"params": {"id": tenantId}
+			"routeName": "/urac/admin/listUsers",
+			"params": {'tId': tenantId}
 		}, function (error, response) {
 			if (error) {
-				$scope.$parent.displayAlert('danger', error.code, tId, true, 'dashboard', error.message);
+				$scope.$parent.displayAlert('danger', error.message);
 			}
 			else {
 				$scope.users = [];
@@ -211,7 +211,7 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 				response.forEach(function (resp) {
 					var myUser = {
 						"v": resp._id,
-						"l": resp.userId
+						"l": resp.username
 					};
 					$scope.users.push(myUser);
 					callback();

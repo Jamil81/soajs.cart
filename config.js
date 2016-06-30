@@ -137,6 +137,12 @@ module.exports = {
 				    "type": "string"
 			    }
 		    },
+		    "userName": {
+			    "source": ['query.userName'], 
+			    "validation": {
+				    "type": "string"
+			    }
+		    },
 		    "items": {
 			    "source": ['body.items'],
 			    "validation": {
