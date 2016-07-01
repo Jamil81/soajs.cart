@@ -33,21 +33,19 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 					});
 					delete form.formData['removeItem-' + index];
 
-
 					// well this work, but should never be used...
 					form.entries.forEach(function (oneEntry) {
 						if (oneEntry.type === 'group' && oneEntry.name === 'items') {
 							console.log(oneEntry);
-							for (var i = oneEntry.entries.length - 1; i >= 0; i--) {
-
+							for (var i = oneEntry.entries.length - 5; i >= 0; i--) {
+								// in case all items are deleted,.
 								itemattr.forEach(function (attr) {
-									if (oneEntry.entries[i].name === (attr + '-' + index)) {
+									if (oneEntry.entries[i] && (oneEntry.entries[i].name === (attr + '-' + index))) {
 										oneEntry.entries.splice(i, 1);
 									}
-									else if (oneEntry.entries[i].name === 'removeItem-' + index) {
+									else if (oneEntry.entries[i] && (oneEntry.entries[i].name === 'removeItem-' + index)) {
 										oneEntry.entries.splice(i, 1);
 									}
-
 								});
 
 							}
@@ -336,7 +334,7 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 								}
 							});
 							$scope.countItems = ++count;
-							console.log( "new items: " + $scope.countItems );
+							console.log("new items: " + $scope.countItems);
 						};
 					}
 				});

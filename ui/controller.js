@@ -111,15 +111,13 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 				console.log("Count items is: " + $scope.countItems);
 				var itemattr = shoppingCartSrv.getItemAttributes();
 				var newItems = [];// always reseted since in the form all data old and new be with you
-				var itemCount=0;
 				for (var index = 0; index < $scope.countItems; index++) {
 					if (formData['productId-' + index]>0) {
 						console.log(formData['productId-' + index]);
-						newItems[itemCount] = {};
+						newItems[index] = {};
 						itemattr.forEach(function (attr) {
-							newItems[itemCount][attr] = formData[attr + '-' + index];
+							newItems[index][attr] = formData[attr + '-' + index];
 						});
-						itemCount++;
 					}
 				}
 				console.log( newItems );

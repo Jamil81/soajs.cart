@@ -47,6 +47,7 @@ service.init(function () {
      * getCarts: this api returns all the carts of all the tenant’s users; it takes a limit and sorts the entries by most recent
      */
     service.get("/cart/getCarts", function (req, res) {
+	    console.log("get carts");
         initBLModel(req, res, function (BL) {
             BL.getCarts(config, req.soajs, function (error, response) {
                 return res.json(req.soajs.buildResponse(error, response));
@@ -59,6 +60,7 @@ service.init(function () {
 	 * addCart: this api allows the administrators to add carts to any user they want
 	 */
 	service.post("/cart/addCart", function (req, res) {
+		console.log("Adding Carts");
 		initBLModel(req, res, function (BL) {
 			BL.addCart(config, req.soajs, function (error, response) {
 				return res.json(req.soajs.buildResponse(error, response));
