@@ -2,22 +2,6 @@
 var shoppingCartService = soajsApp.components;
 shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($timeout, $http) {
 
-	/*
-	 ja: estgnayna 3n jhdmetik
-	 function callAPI(config, callback) {
-	 $http(config).success(function (response, status, headers, config) {
-	 $timeout(function () {
-	 return callback(null, response);
-	 }, 500);
-	 }).error(function (errData, status, headers, config) {
-	 $timeout(function () {
-	 return callback(errData);
-	 }, 500);
-	 });
-	 }
-	 */
-
-
 	function cloneItem(index, data) {
 
 		data = data ? data : {
@@ -242,15 +226,10 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 		},
 
 		'buildForm': function ($scope, $modal, submitAction) {
-			console.log($scope.data);
-			console.log("____");
-
-			console.log("teneant id:" + $scope.data.tenantid);
 			var config = {
 				"timeout": $timeout,
 				"form": {
 					"entries": [
-
 						{
 							'name': 'tenantId',
 							'label': 'Tenants',
@@ -270,7 +249,6 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 								});
 							}
 						},
-
 						{
 							'name': 'userId',
 							'label': 'Users',
@@ -280,8 +258,6 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 							'tooltip': 'Select user( should select tenant first )',
 							'required': true
 						},
-
-
 						{
 							'name': 'items',
 							'label': "Items",
@@ -350,7 +326,6 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 
 			}
 			function addItem(cb) {
-				console.log("Counr is: " + $scope.countItems)
 				formConf.entries.forEach(function (entry) {
 					if (entry.name === 'addItem' && entry.type === 'html') {
 						entry.onAction = function (id, data, form) {
@@ -361,9 +336,11 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 								}
 							});
 							$scope.countItems = ++count;
+							console.log( "new items: " + $scope.countItems );
 						};
 					}
 				});
+				console.log("Counr is: " + $scope.countItems);
 				cb();
 			}
 

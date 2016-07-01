@@ -80,14 +80,11 @@ module.exports = {
 	
 	"addCart": function (soajs, cb) {
 		checkIfMongo(soajs);
-		console.log( "Adding CArt");
 		var curTime = new Date().getTime();
 		var userId = soajs.inputmaskData.userId;
 		var username = soajs.inputmaskData.userName;
 		var tenantId = soajs.inputmaskData.tenantId;
 
-		console.log(soajs.inputmaskData);
-		console.log(username);
 		var input = {
 			"user": {
 				"id": userId,
@@ -96,7 +93,8 @@ module.exports = {
 			"tenantid": tenantId,
 			"created": curTime
 		};
-		
+		console.log("Items");
+		console.log( soajs.inputmaskData.items );
 		mongo.update(collName, {"user.id": userId},
 			{
 				"$setOnInsert": input,

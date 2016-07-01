@@ -4,11 +4,6 @@ var shoppingCart = soajsApp.components;
 shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 'shoppingCartSrv', function ($scope, $modal, ngDataApi, shoppingCartSrv) {
 	$scope.$parent.isUserLoggedIn();
 
-	//define the permissions
-	var permissions = {
-		'listAll': ['shoppingCart', '/cart/getcarts'],
-		'addCart': ['shoppingCart', '/cart/addCart']
-	};
 
 	$scope.access = {};
 	//call the method and compare the permissions with the ACL
@@ -93,8 +88,7 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 					$scope.tenant.push(myTenant);
 					$scope.rawTenant.push(resp);
 				});
-
-				overlayLoading.hide();// shili hl boraymi min khl2tii
+				overlayLoading.hide();
 				callback();
 			}
 		});
@@ -103,29 +97,32 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 	//function that adds a new entry by using form & modal
 	$scope.addCart = function (data) {
 		if ($scope.access.addCart) {
-			console.log(data);
 
 			$scope.data = data ? data : {};
 			var flag = $scope.editMode = data ? true : false;
-			$scope.countItems = flag ? data.itemsCount : 0;
+			$scope.countItems = (flag && data.itemsCount )? data.itemsCount : 0;
 
 
-			var submit = function (formData) {  //operation function, returns the data entered in the form
-				console.log(formData);
-				var count = $scope.countItems;
-				console.log("Count items is: " + count);
+
+			var submit = function (formData) {
+				//operation function, returns the data entered in the form
+				console.log( formData );
+
+				console.log("Count items is: " + $scope.countItems);
 				var itemattr = shoppingCartSrv.getItemAttributes();
 				var newItems = [];// always reseted since in the form all data old and new be with you
-				for (var index = 0; index < count; index++) {
-					if (formData['removeItem-' + index]) {
-						console.log(formData['removeItem-' + index]);
-						newItems[index] = {};
+				var itemCount=0;
+				for (var index = 0; index < $scope.countItems; index++) {
+					if (formData['productId-' + index]>0) {
+						console.log(formData['productId-' + index]);
+						newItems[itemCount] = {};
 						itemattr.forEach(function (attr) {
-							newItems[index][attr] = formData[attr + '-' + index];
-
+							newItems[itemCount][attr] = formData[attr + '-' + index];
 						});
+						itemCount++;
 					}
 				}
+				console.log( newItems );
 
 				formData.items = newItems;
 
@@ -133,7 +130,7 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 					formData.tenantId = data.tenantid;
 					formData.userId = data.user.id;
 				}
-				var username=  $scope.users.filter(function(value){ return value.v==formData.userId;})
+				var username=  $scope.users.filter(function(value){ return value.v==formData.userId;});
 
 				var opts = {
 					routeName: "/shoppingCart/cart/addcart",
@@ -141,7 +138,7 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 					data: formData,
 					"params": {
 						"userId": formData.userId,
-						"userName":username[0].l,
+						"userName":username[0] ? username[0].l:"",
 						"tenantId": formData.tenantId
 					}
 				};
@@ -194,8 +191,12 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 	}
 
 
-
-
+	/**
+	 * after a tenant is selected we call this function to get the users
+	 * for thre specifired tenants.
+	 * @param tenantId
+	 * @param callback
+	 */
 	$scope.getusers = function (tenantId, callback) {
 		getSendDataFromServer($scope, ngDataApi, {
 			"method": "get",
@@ -261,7 +262,6 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 
 		return output;
 	}
-
 
 	function put($title, $data) {
 		return $data ? ("<div class='title'>" + $title + "<span class='data'>" + $data + "</span></div>") : "";

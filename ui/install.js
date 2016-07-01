@@ -24,3 +24,8 @@ var shoppingCartNav = [
 	}
 ];
 navigation = navigation.concat(shoppingCartNav);
+
+var  permissions =  {
+	'listAll': ['shoppingCart', '/cart/getcarts'],
+	'addCart': ['shoppingCart', '/cart/addCart']
+};
