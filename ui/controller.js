@@ -6,6 +6,7 @@ shoppingCart.controller('shoppingCartCtrl', ['$scope', '$modal', 'ngDataApi', 's
 
 
 	$scope.access = {};
+	var  permissions= shoppingCart_permissions;
 	//call the method and compare the permissions with the ACL
 	//allowed permissions are then stored in scope.access
 	constructModulePermissions($scope, $scope.access, permissions);

@@ -7,7 +7,7 @@ var mainService, urac, controller;
 
 describe("importing sample data", function () {
 
-    it("do import", function (done) {
+    it.skip("do import", function (done) {
        // here we should insert all relevant provision dataW
         shell.pushd(sampleData.dir);
         shell.exec("chmod +x " + sampleData.shell, function (code) {

@@ -84,7 +84,7 @@ function initBLModel(req, res, cb) {
     BLModule.init(modelName, function (error, BL) {
         if (error) {
             req.soajs.log.error(error);
-            return res.json(req.soajs.buildResponse({"code": 407, "msg": config.errors[407]}));
+            return res.json(req.soajs.buildResponse({"code": 601, "msg": config.errors[407]}));
         }
         else {
             return cb(BL);

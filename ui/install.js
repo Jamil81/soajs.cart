@@ -4,7 +4,7 @@ var shoppingCartNav = [
 		'id': 'shoppingCart',
 		'label': 'Shopping Cart',
 		'url': '#/shoppingCart',
-		'scripts': ['modules/DEV/shoppingCart/controller.js', 'modules/DEV/shoppingCart/service.js'],
+		'scripts': ['modules/DEV/shoppingCart/config.js','modules/DEV/shoppingCart/controller.js', 'modules/DEV/shoppingCart/service.js'],
 		'tplPath': 'modules/DEV/shoppingCart/directives/list.tmpl',
 		//permissions information
 		'checkPermission': {
@@ -24,8 +24,3 @@ var shoppingCartNav = [
 	}
 ];
 navigation = navigation.concat(shoppingCartNav);
-
-var  permissions =  {
-	'listAll': ['shoppingCart', '/cart/getcarts'],
-	'addCart': ['shoppingCart', '/cart/addCart']
-};

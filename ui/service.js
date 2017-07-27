@@ -194,7 +194,10 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 			getSendDataFromServer($scope, ngDataApi, opts, callback);
 
 		},
-		'printGrid': function ($scope, response) {
+
+
+
+	'printGrid': function ($scope, response) {
 			var options = {
 				'grid': {
 					recordsPerPageArray: [20, 50, 100, 200],
@@ -218,8 +221,18 @@ shoppingCartService.service('shoppingCartSrv', ['$timeout', '$http', function ($
 						'label': 'Edit Cart',
 						'handler': 'addCart'
 					}
-				]
+				],
+				'top': []
 			};
+
+			if($scope.access.delete){
+				options.top.push({
+					'icon': 'remove2',
+					'label': 'Delete Cart(s)',
+					'handler': 'deleteCarts'
+				});
+			}
+
 			buildGrid($scope, options);
 		},
 
